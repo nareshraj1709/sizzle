@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sizzle — What Era Are You In?</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+  :root {
+    --bg: #080608;
+    --surface: #100e12;
+    --card: #16131a;
+    --border: rgba(255,255,255,0.07);
+    --text: #f0eaf7;
+    --muted: rgba(240,234,247,0.45);
+    --accent: #c084fc;
+    --accent2: #f472b6;
+    --accent3: #818cf8;
+    --gold: #fbbf24;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 20%, rgba(192,132,252,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 80% 80%, rgba(244,114,182,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 60% 30%, rgba(129,140,248,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Grain overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* SCREENS */
+  .screen { display: none !important; }
+  .screen.active { display: flex !important; }
+  #quiz.active, #loading.active, #result.active, #full-result.active { display: block !important; }
+
+  /* ─── LANDING ─── */
+  #landing {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 24px;
+  }
+
+  .logo-mark {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 48px;
+        animation: fadeUp 0.8s 0.2s both;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(48px, 10vw, 88px);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+        animation: fadeUp 0.8s 0.4s both;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 400px;
+    line-height: 1.6;
+    margin-bottom: 52px;
+        animation: fadeUp 0.8s 0.6s both;
+  }
+
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    padding: 18px 40px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 40px rgba(192,132,252,0.3);
+        animation: fadeUp 0.8s 0.8s both;
+    letter-spacing: 0.01em;
+  }
+
+  .cta-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 0 60px rgba(192,132,252,0.45);
+  }
+
+  .cta-btn svg { width: 18px; height: 18px; }
+
+  .landing-note {
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--muted);
+        animation: fadeUp 0.8s 1s both;
+  }
+
+  .era-examples {
+    margin-top: 64px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+        animation: fadeUp 0.8s 1.1s both;
+  }
+
+  .era-pill {
+    padding: 6px 16px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    background: rgba(255,255,255,0.03);
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── QUIZ ─── */
+  #quiz {
+    min-height: 100vh;
+    padding: 60px 24px 80px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .quiz-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 48px;
+  }
+
+  .quiz-logo {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--accent);
+  }
+
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .progress-text {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .progress-bar {
+    width: 120px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .question-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 560px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .q-number {
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+
+  .q-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 5vw, 36px);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 40px;
+    letter-spacing: -0.01em;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .option {
+    padding: 18px 24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 15px;
+    color: var(--text);
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .option:hover {
+    border-color: rgba(192,132,252,0.4);
+    background: rgba(192,132,252,0.06);
+    transform: translateX(4px);
+  }
+
+  .option.selected {
+    border-color: var(--accent);
+    background: rgba(192,132,252,0.1);
+  }
+
+  .option-letter {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .option.selected .option-letter {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .quiz-nav {
+    max-width: 560px;
+    margin: 40px auto 0;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .next-btn {
+    padding: 14px 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .next-btn.enabled {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .next-btn.enabled:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(192,132,252,0.3);
+  }
+
+  /* Question transition */
+  .question-area.fade-out {
+    animation: fadeOutLeft 0.25s forwards;
+  }
+
+  .question-area.fade-in {
+    animation: fadeInRight 0.3s forwards;
+  }
+
+  /* ─── LOADING ─── */
+  #loading {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 24px;
+  }
+
+  .loading-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 6vw, 42px);
+    font-weight: 700;
+    font-style: italic;
+    margin-bottom: 16px;
+  }
+
+  .loading-sub {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 48px;
+  }
+
+  .loading-orb {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    animation: pulse 1.5s ease-in-out infinite;
+    box-shadow: 0 0 60px rgba(192,132,252,0.4);
+    margin-bottom: 32px;
+  }
+
+  .loading-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+  }
+
+  .loading-step {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+  }
+
+  .loading-step.visible { animation: fadeUp 0.5s both; }
+
+  .step-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ─── RESULT ─── */
+  #result {
+    min-height: 100vh;
+    padding: 60px 24px 80px;
+  }
+
+  .result-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .result-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+
+  .era-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(44px, 10vw, 80px);
+    font-weight: 900;
+    font-style: italic;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  .era-subtitle {
+    font-size: 16px;
+    color: var(--muted);
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 32px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .result-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  .card-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  .card-text {
+    font-size: 15px;
+    line-height: 1.7;
+    color: rgba(240,234,247,0.85);
+  }
+
+  .locked-card {
+    background: var(--card);
+    border: 1px dashed rgba(192,132,252,0.25);
+    border-radius: 24px;
+    padding: 32px;
+    margin-bottom: 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .locked-overlay {
+    position: relative;
+  }
+
+  .lock-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+
+  .locked-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .locked-desc {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  .locked-features {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+    margin-bottom: 28px;
+  }
+
+  .locked-feature {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .feature-check {
+    color: var(--accent);
+    font-size: 14px;
+  }
+
+  .unlock-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+  }
+
+  .unlock-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(192,132,252,0.35);
+  }
+
+  .price-tag {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  .share-section {
+    margin-top: 32px;
+  }
+
+  .share-label {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .share-btns {
+    display: flex;
+    gap: 10px;
+  }
+
+  .share-btn {
+    flex: 1;
+    padding: 14px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .share-btn:hover {
+    border-color: rgba(192,132,252,0.4);
+    background: rgba(192,132,252,0.06);
+  }
+
+  .retake-btn {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+  }
+
+  .retake-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+
+  /* ─── UNLOCK / FULL RESULT ─── */
+  #full-result {
+    min-height: 100vh;
+    padding: 60px 24px 80px;
+  }
+
+  .moodboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .mood-cell {
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 100px;
+  }
+
+  .mood-cell:first-child { grid-column: span 2; min-height: 140px; }
+
+  .mood-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 4px;
+  }
+
+  .mood-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeOutLeft {
+    to { opacity: 0; transform: translateX(-20px); }
+  }
+
+  @keyframes fadeInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(192,132,252,0.3); }
+    50% { transform: scale(1.1); box-shadow: 0 0 80px rgba(192,132,252,0.6); }
+  }
+
+  .fade-in-up {
+        animation: fadeUp 0.6s both;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ LANDING ═══ -->
+<div id="landing" class="screen active">
+  <p class="logo-mark">Sizzle</p>
+  <h1 class="hero-title">What <em>era</em><br>are you in?</h1>
+  <p class="hero-sub">Answer 9 questions. Get your era — the one you're actually living right now, not the one you pretend to be in.</p>
+  <button class="cta-btn" onclick="startQuiz()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    Find My Era
+  </button>
+  <p class="landing-note">Takes 2 minutes · Free · Shareable</p>
+  <div class="era-examples">
+    <span class="era-pill">Healing Era</span>
+    <span class="era-pill">Villain Era</span>
+    <span class="era-pill">That Girl Era</span>
+    <span class="era-pill">Chaos Era</span>
+    <span class="era-pill">Glow Up Era</span>
+    <span class="era-pill">Unbothered Era</span>
+    <span class="era-pill">Main Character Era</span>
+    <span class="era-pill">Soft Life Era</span>
+  </div>
+</div>
+
+<!-- ═══ QUIZ ═══ -->
+<div id="quiz" class="screen">
+  <div class="container">
+    <div class="quiz-header">
+      <span class="quiz-logo">Sizzle</span>
+      <div class="progress-wrap">
+        <span class="progress-text" id="progress-text">1 / 9</span>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:11%"></div></div>
+      </div>
+    </div>
+    <div class="question-area" id="question-area">
+      <p class="q-number" id="q-number">Question 01</p>
+      <h2 class="q-text" id="q-text"></h2>
+      <div class="options" id="options"></div>
+    </div>
+    <div class="quiz-nav">
+      <button class="next-btn" id="next-btn" onclick="nextQuestion()">Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LOADING ═══ -->
+<div id="loading" class="screen">
+  <div class="loading-orb"></div>
+  <h2 class="loading-title">Reading your energy...</h2>
+  <p class="loading-sub">This might take a moment</p>
+  <div class="loading-steps" id="loading-steps">
+    <div class="loading-step"><div class="step-dot"></div>Analysing your answers</div>
+    <div class="loading-step"><div class="step-dot"></div>Mapping your emotional frequency</div>
+    <div class="loading-step"><div class="step-dot"></div>Identifying your era</div>
+    <div class="loading-step"><div class="step-dot"></div>Crafting your reading</div>
+  </div>
+</div>
+
+<!-- ═══ RESULT (FREE) ═══ -->
+<div id="result" class="screen">
+  <div class="container">
+    <div class="result-header fade-in-up">
+      <p class="result-eyebrow">Your era is</p>
+      <h1 class="era-name" id="result-era-name"></h1>
+      <p class="era-subtitle" id="result-era-subtitle"></p>
+    </div>
+
+    <div class="result-card fade-in-up" style="animation-delay:0.2s">
+      <p class="card-label">Your Reading</p>
+      <p class="card-text" id="result-reading"></p>
+    </div>
+
+    <div class="locked-card fade-in-up" style="animation-delay:0.35s">
+      <div class="locked-overlay">
+        <div class="lock-icon">✦</div>
+        <h3 class="locked-title">Your Full Era Report</h3>
+        <p class="locked-desc">Go deeper. Get the full picture of where you are, what it means, and what to do next.</p>
+        <div class="locked-features">
+          <div class="locked-feature"><span class="feature-check">✓</span> Aesthetic moodboard for your era</div>
+          <div class="locked-feature"><span class="feature-check">✓</span> Your era anthem (song that matches your energy)</div>
+          <div class="locked-feature"><span class="feature-check">✓</span> The shadow side of your era (what to watch out for)</div>
+          <div class="locked-feature"><span class="feature-check">✓</span> Your next era — where you're heading</div>
+          <div class="locked-feature"><span class="feature-check">✓</span> Shareable card for TikTok & Instagram</div>
+        </div>
+        <button class="unlock-btn" onclick="unlockFull()">Unlock Full Report</button>
+        <p class="price-tag">One-time · £1.99</p>
+      </div>
+    </div>
+
+    <div class="share-section fade-in-up" style="animation-delay:0.5s">
+      <p class="share-label">Share your era</p>
+      <div class="share-btns">
+        <button class="share-btn" onclick="shareResult()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Share
+        </button>
+        <button class="share-btn" onclick="copyResult()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy
+        </button>
+      </div>
+      <button class="retake-btn" onclick="retake()">↺ Retake the quiz</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FULL RESULT (UNLOCKED) ═══ -->
+<div id="full-result" class="screen">
+  <div class="container">
+    <div class="result-header fade-in-up">
+      <p class="result-eyebrow">Full Era Report</p>
+      <h1 class="era-name" id="full-era-name"></h1>
+    </div>
+
+    <div class="moodboard fade-in-up" id="moodboard" style="animation-delay:0.1s"></div>
+
+    <div class="result-card fade-in-up" style="animation-delay:0.2s">
+      <p class="card-label">Deep Reading</p>
+      <p class="card-text" id="full-reading"></p>
+    </div>
+
+    <div class="result-card fade-in-up" style="animation-delay:0.3s">
+      <p class="card-label">Your Era Anthem</p>
+      <p class="card-text" id="full-anthem"></p>
+    </div>
+
+    <div class="result-card fade-in-up" style="animation-delay:0.4s">
+      <p class="card-label">Shadow Side — Watch Out For This</p>
+      <p class="card-text" id="full-shadow"></p>
+    </div>
+
+    <div class="result-card fade-in-up" style="animation-delay:0.5s">
+      <p class="card-label">Your Next Era</p>
+      <p class="card-text" id="full-next"></p>
+    </div>
+
+    <div class="share-section fade-in-up" style="animation-delay:0.6s">
+      <div class="share-btns">
+        <button class="share-btn" onclick="shareResult()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Share Your Era
+        </button>
+        <button class="share-btn" onclick="retake()">↺ Retake</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    text: "When you wake up, your first feeling is...",
+    options: ["Determined — I have things to do", "Heavy — I need a minute", "Numb — just going through it", "Excited — something's shifting"]
+  },
+  {
+    text: "Your relationship with other people right now is...",
+    options: ["Selective. I'm cutting off energy vampires", "Craving connection but keeping distance", "Open — I'm letting people in", "I'm in my own world honestly"]
+  },
+  {
+    text: "If your life was a movie, this chapter would be called...",
+    options: ["The Reckoning", "The Quiet Before", "The Comeback", "The Unbothering"]
+  },
+  {
+    text: "How are you treating yourself lately?",
+    options: ["Like a priority — finally", "Like an afterthought tbh", "Rebuilding — slowly", "I'm being ruthless about my peace"]
+  },
+  {
+    text: "Your phone usage right now is...",
+    options: ["Doom scrolling at 2am ngl", "Curating my feed to match my energy", "Barely on it — offline era", "Posting everything. I'm in my content era"]
+  },
+  {
+    text: "What's your energy when someone crosses you?",
+    options: ["I address it. No more letting things slide", "I go quiet and pull back", "I forgive quickly, I'm healing", "I don't even react. Unbothered."]
+  },
+  {
+    text: "Your goals right now feel...",
+    options: ["Crystal clear and I'm moving", "Fuzzy — still figuring it out", "Big but I'm scared to go for them", "I'm just focusing on feeling good first"]
+  },
+  {
+    text: "The vibe of your space (room, home) is...",
+    options: ["Aesthetic and intentional", "A bit chaotic if I'm honest", "Cosy and comforting", "Minimal. Clearing everything out."]
+  },
+  {
+    text: "Where are you emotionally right now — really?",
+    options: ["Healing from something", "Building something new", "Protecting my peace at all costs", "In my feelings but thriving somehow"]
+  }
+];
+
+const eras = {
+  healing: {
+    name: "Healing Era",
+    subtitle: "The quiet work nobody sees",
+    color1: "#818cf8", color2: "#c084fc",
+    reading: "You're in the middle of something real. Not the dramatic kind of healing that looks good on TikTok — the slow, private kind. You're learning that you were allowed to be hurt, and you're slowly, quietly starting to believe that you'll be okay. This era is doing more for you than it looks like from the outside.",
+    anthem: "\"Ghost\" by Justin Bieber or \"Liability\" by Lorde — something soft that holds your sadness without dramatising it.",
+    shadow: "Your shadow side right now: staying in the healing era longer than you need to. Using 'I'm healing' as a reason not to take risks or let people in again. At some point, healing becomes hiding.",
+    next: "Your next era is a **Glow Up Era** — quieter and more earned than the one you imagined, but completely yours.",
+    mood: [
+      { label: "Aesthetic", value: "Soft & Muted", bg: "linear-gradient(135deg, #1e1b4b, #312e81)" },
+      { label: "Energy", value: "Gentle", bg: "linear-gradient(135deg, #1a1a2e, #16213e)" },
+      { label: "Colour", value: "Lavender & Grey", bg: "linear-gradient(135deg, #4c1d95, #5b21b6)" },
+      { label: "Season", value: "Late Autumn", bg: "linear-gradient(135deg, #292524, #44403c)" }
+    ]
+  },
+  villain: {
+    name: "Villain Era",
+    subtitle: "The world should have been nicer to you",
+    color1: "#f87171", color2: "#fb923c",
+    reading: "You've stopped apologising for taking up space. Something shifted — a person, a moment, a decision — and you decided you were done being the understanding one. This isn't actually a villain era. It's a boundaries era. But you'll call it villain because it sounds better, and honestly? It is better.",
+    anthem: "\"Flowers\" by Miley Cyrus or \"Good 4 U\" by Olivia Rodrigo — the soundtrack of someone who chose themselves.",
+    shadow: "Your shadow side: confusing boundaries with coldness. Blocking people out who deserved to stay, because you're in a season of protection. Not everyone is your enemy. Be surgical, not nuclear.",
+    next: "Your next era is an **Unbothered Era** — you've done the hard work of cutting things away. Now comes the peace.",
+    mood: [
+      { label: "Aesthetic", value: "Dark & Sharp", bg: "linear-gradient(135deg, #1c0a0a, #450a0a)" },
+      { label: "Energy", value: "Controlled", bg: "linear-gradient(135deg, #1a0a0a, #7f1d1d)" },
+      { label: "Colour", value: "Red & Black", bg: "linear-gradient(135deg, #450a0a, #1c1917)" },
+      { label: "Season", value: "Dead of Winter", bg: "linear-gradient(135deg, #111827, #1f2937)" }
+    ]
+  },
+  thatgirl: {
+    name: "That Girl Era",
+    subtitle: "Building the life you actually want",
+    color1: "#34d399", color2: "#6ee7b7",
+    reading: "You're in your structure era. 6am walks, green flags only, saying no to plans that drain you. It sounds exhausting from the outside but it's actually the most free you've felt in a while. You're not doing this for the aesthetic — you genuinely want to become someone you're proud of, and you're actually doing it.",
+    anthem: "\"Good Days\" by SZA or \"In My Life\" by The 1975 — movement music for someone building something real.",
+    shadow: "Your shadow side: turning self-improvement into self-punishment. Feeling guilty for rest days. Comparing your routine to curated highlights online. Your era doesn't need to be Instagrammable to be working.",
+    next: "Your next era is a **Main Character Era** — you've built the foundation. Now you start living from it.",
+    mood: [
+      { label: "Aesthetic", value: "Clean & Bright", bg: "linear-gradient(135deg, #052e16, #14532d)" },
+      { label: "Energy", value: "Intentional", bg: "linear-gradient(135deg, #064e3b, #065f46)" },
+      { label: "Colour", value: "Sage & Cream", bg: "linear-gradient(135deg, #166534, #15803d)" },
+      { label: "Season", value: "Early Spring", bg: "linear-gradient(135deg, #1a2e05, #365314)" }
+    ]
+  },
+  chaos: {
+    name: "Chaos Era",
+    subtitle: "Beautifully falling apart to rebuild",
+    color1: "#fbbf24", color2: "#f59e0b",
+    reading: "Nothing is making sense right now and honestly? That's where the best decisions come from. You're in a season of disruption — plans changed, something ended, the script you were following stopped working. The chaos isn't a sign something's wrong. It's the universe forcing an upgrade you were too comfortable to choose yourself.",
+    anthem: "\"Solar Power\" by Lorde or \"Vienna\" by Billy Joel — songs that tell you to stop rushing to get through it.",
+    shadow: "Your shadow side: mistaking movement for progress. Staying busy to avoid sitting with the real question underneath all the chaos. At some point you'll need to be still enough to hear the answer.",
+    next: "Your next era is a **Healing Era** or **Reinvention Era** — depends which question you answer first.",
+    mood: [
+      { label: "Aesthetic", value: "Maximalist", bg: "linear-gradient(135deg, #451a03, #78350f)" },
+      { label: "Energy", value: "Electric", bg: "linear-gradient(135deg, #7c2d12, #9a3412)" },
+      { label: "Colour", value: "Gold & Fire", bg: "linear-gradient(135deg, #92400e, #b45309)" },
+      { label: "Season", value: "Storm Season", bg: "linear-gradient(135deg, #1c1917, #292524)" }
+    ]
+  },
+  unbothered: {
+    name: "Unbothered Era",
+    subtitle: "The most powerful place you've ever been",
+    color1: "#c084fc", color2: "#a78bfa",
+    reading: "You've arrived somewhere most people never get to. You've stopped performing for people who don't see you, stopped chasing validation you don't need, and stopped explaining yourself to those who've already decided. The unbothered era looks like doing nothing — it's actually the result of doing everything. You did the work. This is the reward.",
+    anthem: "\"Superstar\" by Sheryl Crow or \"I Will Survive\" — something that just radiates quiet confidence.",
+    shadow: "Your shadow side: mistaking emotional distance for peace. Real unbothered means you can feel things deeply and still not be destabilised. If you're numb, that's a different era wearing the unbothered costume.",
+    next: "Your next era is a **Main Character Era** — you've found the peace, now you build from it.",
+    mood: [
+      { label: "Aesthetic", value: "Quiet Luxury", bg: "linear-gradient(135deg, #1e1b4b, #312e81)" },
+      { label: "Energy", value: "Still", bg: "linear-gradient(135deg, #2e1065, #3b0764)" },
+      { label: "Colour", value: "Violet & Dusk", bg: "linear-gradient(135deg, #4c1d95, #5b21b6)" },
+      { label: "Season", value: "Golden Hour", bg: "linear-gradient(135deg, #1e1b4b, #4c1d95)" }
+    ]
+  },
+  glowup: {
+    name: "Glow Up Era",
+    subtitle: "They won't recognise you in 6 months",
+    color1: "#f472b6", color2: "#fb7185",
+    reading: "Something has quietly clicked. You can't fully explain it yet — but you feel it. You're making different choices, spending time differently, wanting different things. The glow up isn't just physical (though that's coming too). It's your entire energy shifting. People will notice before you do. You're already in it.",
+    anthem: "\"Cruel Summer\" by Taylor Swift or \"Starting Over\" by Chris Stapleton — the feeling of momentum.",
+    shadow: "Your shadow side: doing the glow up for the reaction. If you're building for the reveal, you'll lose momentum the moment nobody's watching. The version worth becoming isn't built for an audience.",
+    next: "Your next era is a **Main Character Era** — you're almost there.",
+    mood: [
+      { label: "Aesthetic", value: "Warm & Rising", bg: "linear-gradient(135deg, #4a0519, #831843)" },
+      { label: "Energy", value: "Building", bg: "linear-gradient(135deg, #881337, #9f1239)" },
+      { label: "Colour", value: "Rose & Gold", bg: "linear-gradient(135deg, #9d174d, #be185d)" },
+      { label: "Season", value: "Late Summer", bg: "linear-gradient(135deg, #4a0519, #7f1d1d)" }
+    ]
+  }
+};
+
+let currentQ = 0;
+let answers = [];
+let selectedEra = null;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startQuiz() {
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  const letters = ['A', 'B', 'C', 'D'];
+  document.getElementById('q-number').textContent = `Question ${String(currentQ + 1).padStart(2, '0')}`;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('progress-text').textContent = `${currentQ + 1} / ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((currentQ + 1) / questions.length) * 100}%`;
+
+  const optionsEl = document.getElementById('options');
+  optionsEl.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span>${opt}`;
+    btn.onclick = () => selectOption(i, btn);
+    optionsEl.appendChild(btn);
+  });
+
+  document.getElementById('next-btn').classList.remove('enabled');
+}
+
+function selectOption(idx, el) {
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[currentQ] = idx;
+  document.getElementById('next-btn').classList.add('enabled');
+}
+
+function nextQuestion() {
+  if (answers[currentQ] === undefined) return;
+  const area = document.getElementById('question-area');
+  area.classList.add('fade-out');
+  setTimeout(() => {
+    area.classList.remove('fade-out');
+    currentQ++;
+    if (currentQ >= questions.length) {
+      showLoading();
+    } else {
+      renderQuestion();
+      area.classList.add('fade-in');
+      setTimeout(() => area.classList.remove('fade-in'), 300);
+    }
+  }, 250);
+}
+
+function showLoading() {
+  showScreen('loading');
+  const steps = document.querySelectorAll('.loading-step');
+  steps.forEach((s, i) => {
+    setTimeout(() => { s.classList.add('visible'); }, i * 700);
+  });
+  setTimeout(() => { computeResult(); showResult(); }, 3200);
+}
+
+function computeResult() {
+  // Simple scoring based on answer patterns
+  const scores = { healing: 0, villain: 0, thatgirl: 0, chaos: 0, unbothered: 0, glowup: 0 };
+  const maps = [
+    [{ thatgirl:2, glowup:1 }, { healing:2 }, { chaos:2 }, { glowup:2, thatgirl:1 }],
+    [{ villain:2, unbothered:1 }, { healing:2 }, { thatgirl:1, glowup:1 }, { unbothered:2 }],
+    [{ villain:2 }, { healing:2 }, { glowup:2 }, { unbothered:2 }],
+    [{ thatgirl:2, glowup:1 }, { healing:2, chaos:1 }, { healing:1, glowup:1 }, { villain:2, unbothered:1 }],
+    [{ chaos:2, healing:1 }, { thatgirl:2, unbothered:1 }, { unbothered:2 }, { glowup:2 }],
+    [{ villain:2 }, { healing:2 }, { healing:1, thatgirl:1 }, { unbothered:2 }],
+    [{ thatgirl:2, villain:1 }, { chaos:2 }, { glowup:2 }, { healing:2, thatgirl:1 }],
+    [{ thatgirl:2, unbothered:1 }, { chaos:2 }, { healing:2 }, { villain:1, unbothered:1 }],
+    [{ healing:2 }, { glowup:2, thatgirl:1 }, { villain:1, unbothered:2 }, { chaos:1, glowup:1 }]
+  ];
+  answers.forEach((ans, qi) => {
+    const map = maps[qi][ans];
+    if (map) Object.entries(map).forEach(([era, pts]) => scores[era] += pts);
+  });
+  selectedEra = Object.entries(scores).sort((a,b) => b[1]-a[1])[0][0];
+}
+
+function showResult() {
+  const era = eras[selectedEra];
+  document.getElementById('result-era-name').textContent = era.name;
+  document.getElementById('result-era-subtitle').textContent = era.subtitle;
+  document.getElementById('result-reading').textContent = era.reading;
+  showScreen('result');
+}
+
+function unlockFull() {
+  // Simulate unlock (in production this would trigger payment)
+  showFullResult();
+}
+
+function showFullResult() {
+  const era = eras[selectedEra];
+  document.getElementById('full-era-name').textContent = era.name;
+  document.getElementById('full-reading').textContent = era.reading;
+  document.getElementById('full-anthem').textContent = era.anthem;
+  document.getElementById('full-shadow').textContent = era.shadow;
+  document.getElementById('full-next').innerHTML = era.next;
+
+  // Build moodboard
+  const mb = document.getElementById('moodboard');
+  mb.innerHTML = '';
+  era.mood.forEach((m, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'mood-cell';
+    cell.style.background = m.bg;
+    if (i === 0) cell.style.gridColumn = 'span 2';
+    cell.innerHTML = `<p class="mood-label">${m.label}</p><p class="mood-value">${m.value}</p>`;
+    mb.appendChild(cell);
+  });
+
+  showScreen('full-result');
+}
+
+function shareResult() {
+  const era = eras[selectedEra];
+  const text = `I just found out I'm in my ${era.name} ✦ "${era.subtitle}" — find yours at Sizzle`;
+  if (navigator.share) {
+    navigator.share({ title: 'My Era', text, url: 'https://sizzle' });
+  } else {
+    navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+  }
+}
+
+function copyResult() {
+  const era = eras[selectedEra];
+  const text = `I'm in my ${era.name} ✦ ${era.subtitle}\nFind yours → Sizzle`;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Copied! Paste into your story 🖤');
+  });
+}
+
+function retake() {
+  currentQ = 0;
+  answers = [];
+  selectedEra = null;
+  showScreen('landing');
+}
+</script>
+</body>
+</html>
