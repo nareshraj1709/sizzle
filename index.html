@@ -789,7 +789,35 @@
     color: rgba(240,237,232,0.6);
     line-height: 1.6;
     font-weight: 300;
+    margin-bottom: 6px;
   }
+
+  .share-card-why {
+    font-family: 'Space Mono', monospace;
+    font-size: 9.5px;
+    color: var(--accent);
+    line-height: 1.55;
+    letter-spacing: 0.01em;
+    opacity: 0.85;
+    border-left: 2px solid var(--accent);
+    padding-left: 8px;
+    margin-top: 4px;
+  }
+
+  .share-card-art {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 12px;
+    margin: 4px 0;
+  }
+
+  .share-card-art svg { width: 100%; height: 100%; }
 
   .share-card-bottom {
     position: relative;
@@ -1012,7 +1040,12 @@
       <div class="share-card-label">I'm in my</div>
       <div class="share-card-era" id="shareEra">Healing Era</div>
       <div class="share-card-desc" id="shareDesc">Doing the work. Quietly becoming.</div>
+      <div class="share-card-why" id="shareWhy">Because you finally stopped running from the hard stuff.</div>
     </div>
+
+    <!-- Era visual art -->
+    <div class="share-card-art" id="shareCardArt"></div>
+
     <div class="share-card-bottom">
       <div class="share-card-cta">What era are you in?</div>
       <div class="share-card-url">sizzleio.com</div>
@@ -1116,25 +1149,29 @@ const ERAS = {
     name: "Healing Era",
     sub: "The quiet revolution.",
     reading: "You are in the middle of becoming someone new — and it's not loud or glamorous, it's <strong>quiet and uncomfortable and real</strong>. You're doing the work. Sitting with the hard stuff instead of running from it. Processing things you used to bury. There's grief in this era, but there's also something that feels like soil: <strong>you're laying the foundation</strong> for whoever you're becoming next. Don't rush it.",
-    shareDesc: "Doing the work. Quietly becoming."
+    shareDesc: "Doing the work. Quietly becoming.",
+    shareWhy: "Because you finally stopped running from the hard stuff."
   },
   thatgirl: {
     name: "That Girl Era",
     sub: "Discipline is your love language.",
     reading: "You are <strong>building</strong>. Methodically, intentionally, without apology. Your standards are high — for yourself, your time, your inputs. You've stopped waiting to feel motivated and started acting like the person you want to be. It can look intense from the outside, and maybe it is. But you know that <strong>this version of you is non-negotiable</strong>. The results are coming.",
-    shareDesc: "Disciplined. Focused. Non-negotiable."
+    shareDesc: "Disciplined. Focused. Non-negotiable.",
+    shareWhy: "Because you got tired of waiting to feel ready."
   },
   chaos: {
     name: "Chaos Era",
     sub: "The plot is unhinged. Gloriously.",
     reading: "You are <strong>magnificently unhinged</strong>, and honestly? There's a kind of courage in that. You're living in the friction between who you were and who you're not sure you want to be. Decisions are impulsive. Feelings are big. Plans exist only to be abandoned. This era is messy, but <strong>chaos is often where the most interesting transformations begin</strong>. Pay attention to the patterns in the noise.",
-    shareDesc: "Unhinged. Alive. Figuring it out."
+    shareDesc: "Unhinged. Alive. Figuring it out.",
+    shareWhy: "Because you're making decisions like you don't have a plan — and part of you likes it."
   },
   unbothered: {
     name: "Unbothered Era",
     sub: "Peace is a power move.",
     reading: "You have arrived somewhere that took time and distance and probably a few losses to reach: <strong>genuine peace</strong>. Not the performative kind. Not the 'I'll pretend I don't care' kind. The real thing. You've stopped explaining yourself. Stopped seeking validation from people who were never qualified to give it. This era looks quiet, but make no mistake — <strong>unbothered is one of the most powerful states a person can occupy</strong>.",
-    shareDesc: "Peace found. Explanations? Gone."
+    shareDesc: "Peace found. Explanations? Gone.",
+    shareWhy: "Because you finally stopped auditioning for people who weren't even watching."
   }
 };
 
@@ -1231,16 +1268,147 @@ function showResult() {
   document.getElementById('resultSub').textContent = era.sub;
   document.getElementById('resultReading').innerHTML = era.reading;
 
-  // Share card
-  document.getElementById('shareEra').textContent = era.name;
-  document.getElementById('shareDesc').textContent = era.shareDesc;
-
+  // Share card is populated on open
   showScreen('screen-result');
 }
 
 function retake() { showScreen('screen-landing'); }
 
+const ERA_ART = {
+  healing: `<svg viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="hg1" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#c8f06e" stop-opacity="0.15"/>
+        <stop offset="100%" stop-color="#c8f06e" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <ellipse cx="140" cy="80" rx="110" ry="60" fill="url(#hg1)"/>
+    <!-- Concentric soft rings -->
+    <circle cx="140" cy="80" r="20" fill="none" stroke="#c8f06e" stroke-width="0.6" opacity="0.5"/>
+    <circle cx="140" cy="80" r="36" fill="none" stroke="#c8f06e" stroke-width="0.5" opacity="0.4"/>
+    <circle cx="140" cy="80" r="52" fill="none" stroke="#c8f06e" stroke-width="0.4" opacity="0.3"/>
+    <circle cx="140" cy="80" r="68" fill="none" stroke="#c8f06e" stroke-width="0.3" opacity="0.2"/>
+    <circle cx="140" cy="80" r="84" fill="none" stroke="#c8f06e" stroke-width="0.2" opacity="0.1"/>
+    <!-- Central glyph -->
+    <text x="140" y="88" text-anchor="middle" font-family="serif" font-size="28" font-style="italic" fill="#c8f06e" opacity="0.9">✦</text>
+    <!-- Floating dots -->
+    <circle cx="80" cy="45" r="2" fill="#c8f06e" opacity="0.4"/>
+    <circle cx="200" cy="55" r="1.5" fill="#c8f06e" opacity="0.3"/>
+    <circle cx="60" cy="110" r="1" fill="#c8f06e" opacity="0.3"/>
+    <circle cx="220" cy="115" r="2" fill="#c8f06e" opacity="0.25"/>
+    <circle cx="100" cy="130" r="1.5" fill="#c8f06e" opacity="0.2"/>
+    <circle cx="170" cy="28" r="1" fill="#c8f06e" opacity="0.35"/>
+    <!-- Thin botanical lines -->
+    <path d="M140 80 Q155 55 170 42" stroke="#c8f06e" stroke-width="0.6" fill="none" opacity="0.35"/>
+    <path d="M140 80 Q125 55 110 42" stroke="#c8f06e" stroke-width="0.6" fill="none" opacity="0.35"/>
+    <path d="M140 80 Q160 90 180 100" stroke="#c8f06e" stroke-width="0.5" fill="none" opacity="0.25"/>
+    <animateTransform attributeName="transform" type="rotate" from="0 140 80" to="360 140 80" dur="30s" repeatCount="indefinite" additive="sum"/>
+  </svg>`,
+
+  thatgirl: `<svg viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="tgg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#c8f06e" stop-opacity="0.12"/>
+        <stop offset="100%" stop-color="#c8f06e" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <rect x="20" y="20" width="240" height="120" rx="4" fill="url(#tgg)"/>
+    <!-- Grid lines — discipline / structure -->
+    <line x1="20" y1="40" x2="260" y2="40" stroke="#c8f06e" stroke-width="0.4" opacity="0.2"/>
+    <line x1="20" y1="60" x2="260" y2="60" stroke="#c8f06e" stroke-width="0.4" opacity="0.2"/>
+    <line x1="20" y1="80" x2="260" y2="80" stroke="#c8f06e" stroke-width="0.4" opacity="0.2"/>
+    <line x1="20" y1="100" x2="260" y2="100" stroke="#c8f06e" stroke-width="0.4" opacity="0.2"/>
+    <line x1="20" y1="120" x2="260" y2="120" stroke="#c8f06e" stroke-width="0.4" opacity="0.2"/>
+    <line x1="60" y1="20" x2="60" y2="140" stroke="#c8f06e" stroke-width="0.4" opacity="0.2"/>
+    <line x1="100" y1="20" x2="100" y2="140" stroke="#c8f06e" stroke-width="0.4" opacity="0.2"/>
+    <line x1="140" y1="20" x2="140" y2="140" stroke="#c8f06e" stroke-width="0.4" opacity="0.2"/>
+    <line x1="180" y1="20" x2="180" y2="140" stroke="#c8f06e" stroke-width="0.4" opacity="0.2"/>
+    <line x1="220" y1="20" x2="220" y2="140" stroke="#c8f06e" stroke-width="0.4" opacity="0.2"/>
+    <!-- Rising bar chart — progress -->
+    <rect x="55" y="110" width="14" height="20" rx="2" fill="#c8f06e" opacity="0.35"/>
+    <rect x="95" y="95" width="14" height="35" rx="2" fill="#c8f06e" opacity="0.45"/>
+    <rect x="135" y="75" width="14" height="55" rx="2" fill="#c8f06e" opacity="0.55"/>
+    <rect x="175" y="55" width="14" height="75" rx="2" fill="#c8f06e" opacity="0.65"/>
+    <rect x="215" y="35" width="14" height="95" rx="2" fill="#c8f06e" opacity="0.8"/>
+    <!-- Arrow up -->
+    <path d="M240 32 L248 24 L256 32" stroke="#c8f06e" stroke-width="1.5" fill="none" opacity="0.7" stroke-linecap="round"/>
+    <line x1="248" y1="24" x2="248" y2="44" stroke="#c8f06e" stroke-width="1.5" opacity="0.7" stroke-linecap="round"/>
+  </svg>`,
+
+  chaos: `<svg viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="cg1" cx="30%" cy="40%" r="60%">
+        <stop offset="0%" stop-color="#f06ebd" stop-opacity="0.12"/>
+        <stop offset="100%" stop-color="#f06ebd" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="cg2" cx="70%" cy="60%" r="50%">
+        <stop offset="0%" stop-color="#c8f06e" stop-opacity="0.1"/>
+        <stop offset="100%" stop-color="#c8f06e" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="280" height="160" fill="url(#cg1)"/>
+    <rect width="280" height="160" fill="url(#cg2)"/>
+    <!-- Chaotic overlapping shapes -->
+    <ellipse cx="80" cy="70" rx="55" ry="35" fill="none" stroke="#f06ebd" stroke-width="0.8" opacity="0.4" transform="rotate(-20 80 70)"/>
+    <ellipse cx="180" cy="90" rx="60" ry="30" fill="none" stroke="#c8f06e" stroke-width="0.8" opacity="0.35" transform="rotate(15 180 90)"/>
+    <ellipse cx="140" cy="60" rx="45" ry="50" fill="none" stroke="#6eb8f0" stroke-width="0.6" opacity="0.3" transform="rotate(40 140 60)"/>
+    <!-- Scattered fragments -->
+    <line x1="30" y1="30" x2="70" y2="50" stroke="#f06ebd" stroke-width="1" opacity="0.4"/>
+    <line x1="200" y1="20" x2="240" y2="45" stroke="#c8f06e" stroke-width="1" opacity="0.35"/>
+    <line x1="45" y1="120" x2="90" y2="140" stroke="#6eb8f0" stroke-width="0.8" opacity="0.3"/>
+    <line x1="190" y1="130" x2="250" y2="110" stroke="#f06ebd" stroke-width="0.8" opacity="0.3"/>
+    <!-- Dots explosion -->
+    <circle cx="55" cy="40" r="3" fill="#f06ebd" opacity="0.5"/>
+    <circle cx="220" cy="35" r="2" fill="#c8f06e" opacity="0.6"/>
+    <circle cx="30" cy="100" r="2.5" fill="#6eb8f0" opacity="0.4"/>
+    <circle cx="250" cy="120" r="2" fill="#f06ebd" opacity="0.45"/>
+    <circle cx="140" cy="140" r="3" fill="#c8f06e" opacity="0.35"/>
+    <circle cx="100" cy="20" r="1.5" fill="#6eb8f0" opacity="0.5"/>
+    <circle cx="170" cy="145" r="2" fill="#f06ebd" opacity="0.3"/>
+    <!-- Central glitch text -->
+    <text x="140" y="90" text-anchor="middle" font-family="monospace" font-size="11" fill="#f06ebd" opacity="0.5" letter-spacing="4">CHAOS</text>
+    <text x="143" y="90" text-anchor="middle" font-family="monospace" font-size="11" fill="#c8f06e" opacity="0.3" letter-spacing="4">CHAOS</text>
+  </svg>`,
+
+  unbothered: `<svg viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="ug1" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#6eb8f0" stop-opacity="0.1"/>
+        <stop offset="100%" stop-color="#6eb8f0" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <ellipse cx="140" cy="80" rx="130" ry="70" fill="url(#ug1)"/>
+    <!-- Horizon line — stillness -->
+    <line x1="20" y1="80" x2="260" y2="80" stroke="#6eb8f0" stroke-width="0.8" opacity="0.25"/>
+    <!-- Simple moon/sun -->
+    <circle cx="140" cy="68" r="22" fill="none" stroke="#6eb8f0" stroke-width="0.8" opacity="0.5"/>
+    <circle cx="140" cy="68" r="16" fill="none" stroke="#6eb8f0" stroke-width="0.4" opacity="0.25"/>
+    <!-- Reflection below horizon (flipped, fading) -->
+    <line x1="140" y1="80" x2="140" y2="140" stroke="#6eb8f0" stroke-width="0.4" opacity="0.15"/>
+    <!-- Minimal stars -->
+    <circle cx="60" cy="38" r="1.2" fill="#6eb8f0" opacity="0.6"/>
+    <circle cx="210" cy="30" r="1" fill="#6eb8f0" opacity="0.5"/>
+    <circle cx="40" cy="60" r="0.8" fill="#6eb8f0" opacity="0.4"/>
+    <circle cx="230" cy="55" r="1.2" fill="#6eb8f0" opacity="0.45"/>
+    <circle cx="90" cy="22" r="0.8" fill="#6eb8f0" opacity="0.35"/>
+    <circle cx="180" cy="18" r="1" fill="#6eb8f0" opacity="0.4"/>
+    <!-- Peaceful wavy lines below horizon -->
+    <path d="M30 100 Q80 92 130 100 Q180 108 230 100" stroke="#6eb8f0" stroke-width="0.6" fill="none" opacity="0.2"/>
+    <path d="M30 115 Q80 107 130 115 Q180 123 230 115" stroke="#6eb8f0" stroke-width="0.4" fill="none" opacity="0.13"/>
+    <path d="M30 128 Q80 120 130 128 Q180 136 230 128" stroke="#6eb8f0" stroke-width="0.3" fill="none" opacity="0.08"/>
+    <!-- Cross/plus glyph centre of moon -->
+    <line x1="135" y1="68" x2="145" y2="68" stroke="#6eb8f0" stroke-width="0.8" opacity="0.6"/>
+    <line x1="140" y1="63" x2="140" y2="73" stroke="#6eb8f0" stroke-width="0.8" opacity="0.6"/>
+  </svg>`
+};
+
 function openShare() {
+  const era = ERAS[resultEraKey];
+  const art = ERA_ART[resultEraKey] || ERA_ART.healing;
+  document.getElementById('shareCardArt').innerHTML = art;
+  document.getElementById('shareEra').textContent = era.name;
+  document.getElementById('shareDesc').textContent = era.shareDesc;
+  document.getElementById('shareWhy').textContent = era.shareWhy;
   document.getElementById('shareOverlay').classList.add('active');
 }
 
