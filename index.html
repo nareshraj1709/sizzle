@@ -1253,8 +1253,9 @@ const ERAS = {
 const STRIPE_LINK = 'https://buy.stripe.com/8x23cw4xWdUY47Bg6bgIo00';
 
 function goToStripe() {
-  // Save era to sessionStorage before leaving — restored on return
-  sessionStorage.setItem('sizzle_era', resultEraKey);
+  // Save era to localStorage (survives redirects + new tabs)
+  localStorage.setItem('sizzle_era', resultEraKey);
+  localStorage.setItem('sizzle_pending', 'true');
   window.location.href = STRIPE_LINK;
 }
 
@@ -1289,31 +1290,26 @@ function revealFullReport(eraKey) {
   const params = new URLSearchParams(window.location.search);
   const unlocked = params.get('unlocked');
 
-  if (unlocked === 'true') {
-    // Recover era from sessionStorage
-    const eraKey = sessionStorage.getItem('sizzle_era');
+  // Check URL param OR localStorage pending flag (catches cases where
+  // Stripe redirects without the param e.g. popup/tab issues)
+  const pending = localStorage.getItem('sizzle_pending');
+  const eraKey  = localStorage.getItem('sizzle_era');
 
-    if (eraKey && ERAS[eraKey]) {
-      resultEraKey = eraKey;
-      const era = ERAS[eraKey];
+  if ((unlocked === 'true' || pending === 'true') && eraKey && ERAS[eraKey]) {
+    resultEraKey = eraKey;
+    const era = ERAS[eraKey];
 
-      document.getElementById('resultEra').textContent = era.name;
-      document.getElementById('resultSub').textContent = era.sub;
-      document.getElementById('resultReading').innerHTML = era.reading;
+    document.getElementById('resultEra').textContent = era.name;
+    document.getElementById('resultSub').textContent = era.sub;
+    document.getElementById('resultReading').innerHTML = era.reading;
 
-      showScreen('screen-result');
-      revealFullReport(eraKey);
+    showScreen('screen-result');
+    revealFullReport(eraKey);
 
-      // Clean the URL bar
-      window.history.replaceState({}, '', window.location.pathname);
-      sessionStorage.removeItem('sizzle_era');
-    } else {
-      // sessionStorage lost (e.g. different browser tab) — show generic success
-      showScreen('screen-result');
-      document.getElementById('resultEra').textContent = 'Report Unlocked';
-      document.getElementById('resultSub').textContent = 'Retake the quiz to see your full era report.';
-      window.history.replaceState({}, '', window.location.pathname);
-    }
+    // Clean up
+    window.history.replaceState({}, '', window.location.pathname);
+    localStorage.removeItem('sizzle_pending');
+    // Keep sizzle_era so refresh still works
   }
 })();
 
