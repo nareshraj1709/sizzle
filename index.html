@@ -897,6 +897,40 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  /* ─── FULL REPORT REVEAL ─── */
+  #fullReport {
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  #fullReport .result-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  #fullReport .result-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(200,240,110,0.03) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .unlock-success-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(200,240,110,0.08);
+    border: 1px solid rgba(200,240,110,0.25);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
   /* ─── GLITCH effect on era name ─── */
   @keyframes glitch {
     0% { clip-path: inset(20% 0 60% 0); transform: translate(-4px); }
@@ -1014,8 +1048,32 @@
         <li class="upgrade-perk"><div class="perk-dot"></div>Shareable card for TikTok & Insta</li>
       </ul>
       <div class="upgrade-price">£1.99</div>
-      <div class="upgrade-price-sub">One time · No subscription</div>
-      <button class="btn-primary">Unlock Full Report →</button>
+      <div class="upgrade-price-sub">One time · No subscription · Instant access</div>
+      <button class="btn-primary" onclick="goToStripe()">🔓 Unlock Full Report →</button>
+    </div>
+
+    <!-- ══ FULL REPORT (shown after payment) ══ -->
+    <div id="fullReport" style="display:none">
+
+      <div class="unlock-success-badge">
+        ✦ Full Era Report Unlocked
+      </div>
+
+      <div class="result-card" style="margin-top:8px; border-color: rgba(200,240,110,0.3);">
+        <div class="result-card-label" style="color:var(--accent)">✦ Era Anthem</div>
+        <div class="result-card-text" id="reportAnthem"></div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-card-label" style="color:var(--accent2)">⚠ Shadow Side</div>
+        <div class="result-card-text" id="reportShadow"></div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-card-label" style="color:var(--accent3)">→ Your Next Era</div>
+        <div class="result-card-text" id="reportNext"></div>
+      </div>
+
     </div>
 
     <div style="margin-top:4px">
@@ -1150,30 +1208,114 @@ const ERAS = {
     sub: "The quiet revolution.",
     reading: "You are in the middle of becoming someone new — and it's not loud or glamorous, it's <strong>quiet and uncomfortable and real</strong>. You're doing the work. Sitting with the hard stuff instead of running from it. Processing things you used to bury. There's grief in this era, but there's also something that feels like soil: <strong>you're laying the foundation</strong> for whoever you're becoming next. Don't rush it.",
     shareDesc: "Doing the work. Quietly becoming.",
-    shareWhy: "Because you finally stopped running from the hard stuff."
+    shareWhy: "Because you finally stopped running from the hard stuff.",
+    anthem: '<strong>&ldquo;Liability&rdquo; — Lorde.</strong> Because right now you are learning to be enough for yourself, and this song already knows how that feels before you\'ve finished figuring it out.',
+    shadow: 'The trap of the Healing Era is <strong>making healing your whole personality</strong>. Processing is good. Endless processing without action keeps you stuck. Watch out for using introspection as a way to avoid actually living.',
+    nextEra: 'You\'re heading into your <strong>Glow Up Era</strong>. The work you\'re doing now is quiet — but the results won\'t be. People are going to notice the shift before you even announce it.'
   },
   thatgirl: {
     name: "That Girl Era",
     sub: "Discipline is your love language.",
     reading: "You are <strong>building</strong>. Methodically, intentionally, without apology. Your standards are high — for yourself, your time, your inputs. You've stopped waiting to feel motivated and started acting like the person you want to be. It can look intense from the outside, and maybe it is. But you know that <strong>this version of you is non-negotiable</strong>. The results are coming.",
     shareDesc: "Disciplined. Focused. Non-negotiable.",
-    shareWhy: "Because you got tired of waiting to feel ready."
+    shareWhy: "Because you got tired of waiting to feel ready.",
+    anthem: '<strong>&ldquo;good 4 u&rdquo; — Olivia Rodrigo.</strong> Not because you\'re angry — because you\'ve channelled every hard feeling into something that looks like winning, and it\'s working.',
+    shadow: 'The shadow side of That Girl Era is <strong>confusing your worth with your output</strong>. A rest day doesn\'t make you lazy. Missing one workout doesn\'t erase the streak. Be careful that discipline doesn\'t quietly become punishment.',
+    nextEra: 'You\'re heading into your <strong>Main Character Era</strong>. You\'ve built the foundation. Now you\'re about to actually enjoy it — loudly, publicly, unapologetically.'
   },
   chaos: {
     name: "Chaos Era",
     sub: "The plot is unhinged. Gloriously.",
     reading: "You are <strong>magnificently unhinged</strong>, and honestly? There's a kind of courage in that. You're living in the friction between who you were and who you're not sure you want to be. Decisions are impulsive. Feelings are big. Plans exist only to be abandoned. This era is messy, but <strong>chaos is often where the most interesting transformations begin</strong>. Pay attention to the patterns in the noise.",
     shareDesc: "Unhinged. Alive. Figuring it out.",
-    shareWhy: "Because you're making decisions like you don't have a plan — and part of you likes it."
+    shareWhy: "Because you're making decisions like you don't have a plan — and part of you likes it.",
+    anthem: '<strong>&ldquo;GONE GIRL&rdquo; — Beyoncé.</strong> Because you\'re burning something down to build something better, and even you don\'t know what it is yet — but the energy is immaculate.',
+    shadow: 'The danger of the Chaos Era is <strong>mistaking destruction for transformation</strong>. Not every bridge needs to be burned. Not every feeling needs to be acted on at 2am. Some of this is growth. Some of it is avoidance wearing a fun outfit.',
+    nextEra: 'You\'re heading into your <strong>Healing Era</strong>. The chaos always has a purpose — and yours is almost done doing what it came to do. Something quieter and more intentional is waiting.'
   },
   unbothered: {
     name: "Unbothered Era",
     sub: "Peace is a power move.",
     reading: "You have arrived somewhere that took time and distance and probably a few losses to reach: <strong>genuine peace</strong>. Not the performative kind. Not the 'I'll pretend I don't care' kind. The real thing. You've stopped explaining yourself. Stopped seeking validation from people who were never qualified to give it. This era looks quiet, but make no mistake — <strong>unbothered is one of the most powerful states a person can occupy</strong>.",
     shareDesc: "Peace found. Explanations? Gone.",
-    shareWhy: "Because you finally stopped auditioning for people who weren't even watching."
+    shareWhy: "Because you finally stopped auditioning for people who weren't even watching.",
+    anthem: '<strong>&ldquo;Kill Bill&rdquo; — SZA.</strong> Calm on the surface. Absolutely done underneath. You\'ve made peace with it and that\'s somehow scarier than anger ever was.',
+    shadow: 'The shadow side of Unbothered is <strong>emotional distance dressed up as peace</strong>. Check in: are you genuinely at peace, or have you just stopped letting people in? There\'s a difference between boundaries and walls.',
+    nextEra: 'You\'re heading into your <strong>Soft Life Era</strong>. You\'ve earned the peace — now you get to actually enjoy it. Less armour. More presence. You\'re allowed to want things again.'
   }
 };
+
+// ── STRIPE PAYMENT CONFIG ──────────────────────────────────────────────
+// Single Stripe Payment Link for all eras.
+// In Stripe Dashboard → Payment Links → Edit → After Payment → Redirect to:
+//   https://sizzleio.com/?unlocked=true
+// The era is saved in sessionStorage before redirect and restored on return.
+const STRIPE_LINK = 'https://buy.stripe.com/8x23cw4xWdUY47Bg6bgIo00';
+
+function goToStripe() {
+  // Save era to sessionStorage before leaving — restored on return
+  sessionStorage.setItem('sizzle_era', resultEraKey);
+  window.location.href = STRIPE_LINK;
+}
+
+function simulateUnlock(eraKey) {
+  // Dev mode only
+  revealFullReport(eraKey);
+}
+
+function revealFullReport(eraKey) {
+  const era = ERAS[eraKey];
+  if (!era) return;
+
+  // Hide the upgrade card, show full report
+  document.querySelector('.upgrade-card').style.display = 'none';
+  document.querySelectorAll('.locked-section').forEach(el => el.style.display = 'none');
+
+  document.getElementById('reportAnthem').innerHTML = era.anthem;
+  document.getElementById('reportShadow').innerHTML = era.shadow;
+  document.getElementById('reportNext').innerHTML = era.nextEra;
+  document.getElementById('fullReport').style.display = 'block';
+
+  // Smooth scroll to it
+  setTimeout(() => {
+    document.getElementById('fullReport').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 200);
+}
+
+// ── CHECK FOR STRIPE RETURN ON PAGE LOAD ──────────────────────────────
+// Stripe redirects back to: https://sizzleio.com/?unlocked=true
+// Era is recovered from sessionStorage (saved before redirect)
+(function checkStripeReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const unlocked = params.get('unlocked');
+
+  if (unlocked === 'true') {
+    // Recover era from sessionStorage
+    const eraKey = sessionStorage.getItem('sizzle_era');
+
+    if (eraKey && ERAS[eraKey]) {
+      resultEraKey = eraKey;
+      const era = ERAS[eraKey];
+
+      document.getElementById('resultEra').textContent = era.name;
+      document.getElementById('resultSub').textContent = era.sub;
+      document.getElementById('resultReading').innerHTML = era.reading;
+
+      showScreen('screen-result');
+      revealFullReport(eraKey);
+
+      // Clean the URL bar
+      window.history.replaceState({}, '', window.location.pathname);
+      sessionStorage.removeItem('sizzle_era');
+    } else {
+      // sessionStorage lost (e.g. different browser tab) — show generic success
+      showScreen('screen-result');
+      document.getElementById('resultEra').textContent = 'Report Unlocked';
+      document.getElementById('resultSub').textContent = 'Retake the quiz to see your full era report.';
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }
+})();
 
 function scoreAnswers(answers) {
   // Simple scoring: 0=healing, 1=thatgirl, 2=chaos, 3=unbothered
